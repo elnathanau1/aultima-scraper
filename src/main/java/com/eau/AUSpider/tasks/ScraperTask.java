@@ -43,12 +43,12 @@ public class ScraperTask {
         logger.info("Scanning for new files");
         List<FileEntity> fileEntities = fileRepository.findByDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
         for (int i = 0; i < maxFiles; i++) {
-            FileEntity fileEntity = fileEntities.get(i);
-            if (fileEntity == null) {
+            if(i >= fileEntities.size()) {
                 break;
             }
             Thread.sleep(randomService.getWaitTime());
 
+            FileEntity fileEntity = fileEntities.get(i);
             logger.info("Processing {}", fileEntity);
             String downloadLink = scraperService.getDownloadLink(fileEntity.getUrl());
             if (downloadLink != null) {

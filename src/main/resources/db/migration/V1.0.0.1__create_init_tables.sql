@@ -6,6 +6,7 @@ CREATE TABLE file (
     download_status             text not null,
     url                         text not null,
     file_location               text,
+    file_size                   text,
     create_timestamp_utc        timestamptz not null,
     update_timestamp_utc        timestamptz not null
 );

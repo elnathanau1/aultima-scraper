@@ -3,6 +3,7 @@ package com.eau.AUSpider.services;
 import com.eau.AUSpider.entities.FileEntity;
 import com.eau.AUSpider.enums.FileDownloadStatus;
 import com.eau.AUSpider.repositories.FileRepository;
+import org.apache.commons.io.FileUtils;
 import org.asynchttpclient.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,8 @@ public class DownloadService {
                 public FileOutputStream onCompleted(Response response)
                         throws Exception {
                     fileEntity.setDownloadStatus(FileDownloadStatus.COMPLETE.name());
+                    fileEntity.setFileSize(FileUtils.byteCountToDisplaySize(FileUtils.sizeOf(newFile)));
+
                     fileRepository.save(fileEntity);
                     logger.info("Finished downloading fileEntity={}", fileEntity);
                     return stream;

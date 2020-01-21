@@ -28,6 +28,8 @@ public class FileEntity {
     private String url;
     private String fileLocation;
 
+    private String fileSize;
+
     @CreatedDate
     private Instant createTimestampUtc;
 
