@@ -20,8 +20,6 @@ import java.util.concurrent.TimeUnit;
 public class ScraperService {
     private static Logger logger = LoggerFactory.getLogger(ScraperService.class);
 
-    private WebDriver driver;
-
     @Value("${anime.ultima.root}")
     private String animaUltimaRoot;
 
@@ -83,7 +81,7 @@ public class ScraperService {
         options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
         options.addArguments("javascript.enabled=True");
 
-        driver = new ChromeDriver(options);
+        WebDriver driver = new ChromeDriver(options);
 
         driver.get(url);
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);

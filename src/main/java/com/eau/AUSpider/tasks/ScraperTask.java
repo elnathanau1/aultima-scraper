@@ -46,7 +46,7 @@ public class ScraperTask {
             if(i >= fileEntities.size()) {
                 break;
             }
-            Thread.sleep(randomService.getWaitTime());
+//            Thread.sleep(randomService.getWaitTime());
 
             FileEntity fileEntity = fileEntities.get(i);
             logger.info("Processing {}", fileEntity);
