@@ -29,6 +29,27 @@ dependencies {
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
+
+	// scraping tool to get sites
+	compile 'org.jsoup:jsoup:1.12.1'
+	compile group: 'org.asynchttpclient', name: 'async-http-client', version: '2.10.4'
+	
+	// selenium + webdriver to get around cloudflare
+	compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '4.0.0-alpha-4'
+	compile("io.github.bonigarcia:webdrivermanager:3.8.1")
+	
+	// apache commons for file manipulation
+	compile group: 'commons-io', name: 'commons-io', version: '2.6'
+
+	// jsch for sftp - sending files to pi
+	compile group: 'com.jcraft', name: 'jsch', version: '0.1.55'
+
+	// modelmapper to convert objects
+	compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.4'
+
+
+
+
 }
 
 test {
