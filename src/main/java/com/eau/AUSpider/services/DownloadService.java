@@ -23,8 +23,8 @@ public class DownloadService {
     @Autowired
     private FileRepository fileRepository;
 
-    @Value("${external.drive.path}")
-    private String externalDrivePath;
+    @Value("${local.download.path}")
+    private String localDownloadPath;
 
     @PostConstruct
     public void resetDownloadingFiles() {
@@ -36,9 +36,13 @@ public class DownloadService {
     }
 
     public void downloadFromUrl(FileEntity fileEntity, String downloadUrl) {
-        String fileName = externalDrivePath + fileEntity.getMediaType() + "/" + fileEntity.getSortingFolder() + "/" + fileEntity.getName() + ".mp4";
+        String relativePath = fileEntity.getMediaType() + "/"
+                + fileEntity.getSortingFolder() + "/"
+                + "Season " + fileEntity.getSeason() + "/"
+                + fileEntity.getName() + ".mp4";
+        String fileName = localDownloadPath + relativePath;
 
-        fileEntity.setFileLocation(fileName);
+        fileEntity.setFileLocation(relativePath);
         fileEntity.setDownloadStatus(FileDownloadStatus.DOWNLOADING.name());
         fileRepository.save(fileEntity);
 
@@ -63,7 +67,7 @@ public class DownloadService {
                 @Override
                 public FileOutputStream onCompleted(Response response)
                         throws Exception {
-                    fileEntity.setDownloadStatus(FileDownloadStatus.COMPLETE.name());
+                    fileEntity.setDownloadStatus(FileDownloadStatus.DOWNLOADED.name());
                     fileEntity.setFileSize(FileUtils.byteCountToDisplaySize(FileUtils.sizeOf(newFile)));
 
                     fileRepository.save(fileEntity);

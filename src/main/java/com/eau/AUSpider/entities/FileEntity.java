@@ -36,5 +36,7 @@ public class FileEntity {
     @LastModifiedDate
     private Instant updateTimestampUtc;
 
+    private Integer season;
+    private Integer episode;
 
 }

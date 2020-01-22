@@ -35,25 +35,30 @@ public class ScraperTask {
     @Autowired
     RandomService randomService;
 
-    @Value("${download.scan.task.max.files}")
-    private int maxFiles;
+//    @Value("${download.scan.task.max.files}")
+//    private int maxFiles;
 
     @Scheduled(fixedDelayString = "${download.scan.task.interval.milliseconds}")
     public void downloadFiles() throws InterruptedException {
         logger.info("Scanning for new files");
         List<FileEntity> fileEntities = fileRepository.findByDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
-        for (int i = 0; i < maxFiles; i++) {
-            if(i >= fileEntities.size()) {
-                break;
-            }
-//            Thread.sleep(randomService.getWaitTime());
+        Thread.sleep(randomService.getWaitTime());
 
-            FileEntity fileEntity = fileEntities.get(i);
-            logger.info("Processing {}", fileEntity);
-            String downloadLink = scraperService.getDownloadLink(fileEntity.getUrl());
-            if (downloadLink != null) {
-                downloadService.downloadFromUrl(fileEntity, downloadLink);
-            }
+        FileEntity fileEntity = fileEntities.get(0);
+
+        // fix name
+        String name = fileEntity.getSortingFolder() + "_S" + fileEntity.getSeason() + "E" + fileEntity.getEpisode();
+        fileEntity.setName(name);
+        fileRepository.save(fileEntity);
+
+        logger.info("Processing {}", fileEntity);
+        String downloadLink = scraperService.getDownloadLink(fileEntity.getUrl());
+        if (downloadLink != null) {
+            downloadService.downloadFromUrl(fileEntity, downloadLink);
+        }
+        else{
+            fileEntity.setDownloadStatus(FileDownloadStatus.CANNOT_BE_SCRAPED.name());
+            fileRepository.save(fileEntity);
         }
     }
 }

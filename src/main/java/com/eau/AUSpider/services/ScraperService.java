@@ -77,9 +77,13 @@ public class ScraperService {
         if (url == null) {
             return null;
         }
+
         ChromeOptions options = new ChromeOptions();
+        options.addArguments("--no-sandbox");
+//        options.addArguments("--disable-dev-shm-usage");
         options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
         options.addArguments("javascript.enabled=True");
+        options.setExperimentalOption("useAutomationExtension", false);
 
         WebDriver driver = new ChromeDriver(options);
 
