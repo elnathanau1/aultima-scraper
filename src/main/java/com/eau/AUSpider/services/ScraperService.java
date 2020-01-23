@@ -1,5 +1,8 @@
 package com.eau.AUSpider.services;
 
+import com.eau.AUSpider.entities.FileEntity;
+import com.eau.AUSpider.enums.FileDownloadStatus;
+import com.eau.AUSpider.repositories.FileRepository;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -10,6 +13,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,9 +27,17 @@ public class ScraperService {
     @Value("${anime.ultima.root}")
     private String animaUltimaRoot;
 
+    @Autowired
+    FileRepository fileRepository;
+
+    @Autowired
+    NameService nameService;
+
     @PostConstruct
     private void setup() {
         WebDriverManager.chromedriver().setup();
+
+        addEpisodesToTable("https://www17.animeultima.eu/a/kimetsu-no-yaiba_201885", "Kimetsu_no_Yaiba", 1);
     }
 
     public String getDownloadLink(String url) {
@@ -105,6 +117,41 @@ public class ScraperService {
         }
         driver.quit();
         return null;
+    }
+
+    public void addEpisodesToTable(String url, String sortingFolder, int season) {
+        String html = getHtmlFromSelenium(url, "Episode #");
+        try {
+            Document document = Jsoup.parse(html);
+            Element div = document.getElementsByClass("box-item column-item").get(0);
+            Element table = div.child(0).child(0).child(0);
+
+            Elements rows = table.child(2).children();
+            for (Element row : rows) {
+                int episode = Integer.parseInt(row.getElementsByAttributeValue("scope", "row").get(0).text());
+                String epUrl = row.getElementsByAttribute("href").get(0).attr("href");
+
+                if (fileRepository.findBySortingFolderAndSeasonAndEpisode(sortingFolder, season, episode) == null) {
+
+                    FileEntity fileEntity = FileEntity.builder()
+                            .mediaType("TV")
+                            .sortingFolder(sortingFolder)
+                            .season(season)
+                            .episode(episode)
+                            .url(epUrl)
+                            .downloadStatus(FileDownloadStatus.NOT_STARTED.name())
+                            .build();
+
+                    fileEntity.setName(nameService.getName(fileEntity));
+                    fileRepository.save(fileEntity);
+                    logger.info("Saved to db: {}", fileEntity);
+                }
+            }
+
+        }
+        catch (Exception e) {
+            logger.error("Failed to scrape episodes from url={}", url, e);
+        }
     }
 
 }

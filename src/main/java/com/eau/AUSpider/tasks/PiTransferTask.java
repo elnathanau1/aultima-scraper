@@ -27,7 +27,8 @@ public class PiTransferTask {
     @Autowired
     PiTransferService piTransferService;
 
-    @Scheduled(fixedDelayString = "${download.scan.task.interval.milliseconds}")
+//    @Scheduled(fixedDelayString = "${download.scan.task.interval.milliseconds}")
+    @Scheduled(cron = "0 5-50/5 * * * *")
     public void transferFiles() {
         logger.info("Start file transfer");
         List<FileEntity> fileEntities = fileRepository.findByDownloadStatus(FileDownloadStatus.DOWNLOADED.name());

@@ -3,7 +3,10 @@ package com.eau.AUSpider.controllers;
 import com.eau.AUSpider.entities.FileEntity;
 import com.eau.AUSpider.enums.FileDownloadStatus;
 import com.eau.AUSpider.models.DownloadRequestModel;
+import com.eau.AUSpider.models.SeriesRequestModel;
 import com.eau.AUSpider.repositories.FileRepository;
+import com.eau.AUSpider.services.NameService;
+import com.eau.AUSpider.services.ScraperService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +26,35 @@ public class DownloadController {
     FileRepository fileRepository;
 
     @Autowired
+    NameService nameService;
+
+    @Autowired
     ModelMapper modelMapper;
 
-    @PostMapping(path = "/download/", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @Autowired
+    ScraperService scraperService;
+
+    @PostMapping(path = "/download", consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity addDownloadRequest(@RequestBody DownloadRequestModel downloadRequestModel) {
         FileEntity fileEntity = modelMapper.map(downloadRequestModel, FileEntity.class);
-        fileEntity.setDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
-        fileEntity = fileRepository.save(fileEntity);
-        logger.info("Saved {}", fileEntity);
-        return new ResponseEntity(fileEntity, HttpStatus.ACCEPTED);
+
+        if (fileRepository.findBySortingFolderAndSeasonAndEpisode(fileEntity.getSortingFolder(), fileEntity.getSeason(), fileEntity.getEpisode()) == null) {
+            fileEntity.setDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
+
+            String name = nameService.getName(fileEntity);
+            fileEntity.setName(name);
+            fileRepository.save(fileEntity);
+
+            fileEntity = fileRepository.save(fileEntity);
+            logger.info("Saved {}", fileEntity);
+            return new ResponseEntity(fileEntity, HttpStatus.ACCEPTED);
+        }
+        return new ResponseEntity("Already in DB", HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping(path = "/download/series", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity addFromSeries(@RequestBody SeriesRequestModel seriesRequestModel) {
+        scraperService.addEpisodesToTable(seriesRequestModel.getUrl(), seriesRequestModel.getSortingFolder(), seriesRequestModel.getSeason());
+        return new ResponseEntity(HttpStatus.ACCEPTED);
     }
 }

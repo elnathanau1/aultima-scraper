@@ -10,7 +10,7 @@ public class RandomService {
     public int getWaitTime() {
         Random random = new Random();
         int milliseconds = random.nextInt(30000);
-        return 30000 + milliseconds;
+        return milliseconds;
 
     }
 }

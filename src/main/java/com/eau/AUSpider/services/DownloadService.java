@@ -26,14 +26,14 @@ public class DownloadService {
     @Value("${local.download.path}")
     private String localDownloadPath;
 
-    @PostConstruct
-    public void resetDownloadingFiles() {
-        List<FileEntity> fileEntities = fileRepository.findByDownloadStatus(FileDownloadStatus.DOWNLOADING.name());
-        fileEntities.forEach(entity -> {
-            entity.setDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
-            fileRepository.save(entity);
-        });
-    }
+//    @PostConstruct
+//    public void resetDownloadingFiles() {
+//        List<FileEntity> fileEntities = fileRepository.findByDownloadStatus(FileDownloadStatus.DOWNLOADING.name());
+//        fileEntities.forEach(entity -> {
+//            entity.setDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
+//            fileRepository.save(entity);
+//        });
+//    }
 
     public void downloadFromUrl(FileEntity fileEntity, String downloadUrl) {
         String relativePath = fileEntity.getMediaType() + "/"
