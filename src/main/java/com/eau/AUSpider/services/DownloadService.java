@@ -3,7 +3,9 @@ package com.eau.AUSpider.services;
 import com.eau.AUSpider.entities.FileEntity;
 import com.eau.AUSpider.enums.FileDownloadStatus;
 import com.eau.AUSpider.repositories.FileRepository;
+import com.google.common.base.Stopwatch;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.asynchttpclient.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class DownloadService {
@@ -36,6 +39,8 @@ public class DownloadService {
     }
 
     public void downloadFromUrl(FileEntity fileEntity, String downloadUrl) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         String relativePath = fileEntity.getMediaType() + "/"
                 + fileEntity.getSortingFolder() + "/"
                 + "Season " + fileEntity.getSeason() + "/"
@@ -51,7 +56,7 @@ public class DownloadService {
             newFile.getParentFile().mkdirs();
             newFile.createNewFile();
 
-            logger.info("Started downloading fileEntity={}", fileEntity);
+            logger.info("Started downloading {}", fileEntity.getName());
             AsyncHttpClient client = Dsl.asyncHttpClient();
             FileOutputStream stream = new FileOutputStream(newFile, false);
 
@@ -71,12 +76,12 @@ public class DownloadService {
                     fileEntity.setFileSize(FileUtils.byteCountToDisplaySize(FileUtils.sizeOf(newFile)));
 
                     fileRepository.save(fileEntity);
-                    logger.info("Finished downloading fileEntity={}", fileEntity);
+                    stopWatch.stop();
+                    logger.info("Finished downloading {} ({}) in {} seconds", fileEntity.getName(), fileEntity.getFileSize(), stopWatch.getTime(TimeUnit.SECONDS));
                     return stream;
                 }
             });
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("downloadFromUrl failed for {} with exception={}", fileEntity, e.getMessage(), e);
         }
     }

@@ -4,6 +4,7 @@ import com.eau.AUSpider.entities.FileEntity;
 import com.eau.AUSpider.enums.FileDownloadStatus;
 import com.eau.AUSpider.repositories.FileRepository;
 import com.jcraft.jsch.*;
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

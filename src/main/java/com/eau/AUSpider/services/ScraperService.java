@@ -36,16 +36,12 @@ public class ScraperService {
     @PostConstruct
     private void setup() {
         WebDriverManager.chromedriver().setup();
-
-        addEpisodesToTable("https://www17.animeultima.eu/a/kimetsu-no-yaiba_201885", "Kimetsu_no_Yaiba", 1);
     }
 
     public String getDownloadLink(String url) {
         String animeUltimaId = getAnimeUltimaId(url);
-        logger.info("animeUltimaId = {}", animeUltimaId);
 
         String videoUrl = animaUltimaRoot + animeUltimaId;
-        logger.info("videoUrl = {}", videoUrl);
 
         String googleStorageUrl = getGoogleStorageUrl(videoUrl);
         return googleStorageUrl;

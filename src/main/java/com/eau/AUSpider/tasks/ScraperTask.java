@@ -11,7 +11,6 @@ import com.eau.AUSpider.services.ScraperService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -41,11 +40,11 @@ public class ScraperTask {
 //    @Value("${download.scan.task.max.files}")
 //    private int maxFiles;
 
-    @Scheduled(fixedDelayString = "${download.scan.task.interval.milliseconds}")
+    @Scheduled(cron = "0 */2 * * * *")
     public void downloadFiles() throws InterruptedException {
         logger.info("Scanning for new files");
         List<FileEntity> fileEntities = fileRepository.findByDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
-        Thread.sleep(randomService.getWaitTime());
+//        Thread.sleep(randomService.getWaitTime());
 
         if (fileEntities.size() > 0) {
             FileEntity fileEntity = fileEntities.get(0);
@@ -56,9 +55,9 @@ public class ScraperTask {
             fileEntity.setName(name);
             fileRepository.save(fileEntity);
 
-            logger.info("Processing {}", fileEntity);
             String downloadLink = scraperService.getDownloadLink(fileEntity.getUrl());
             if (downloadLink != null) {
+                logger.info("Could not find download link for {}", fileEntity.getName());
                 downloadService.downloadFromUrl(fileEntity, downloadLink);
             } else {
                 fileEntity.setDownloadStatus(FileDownloadStatus.CANNOT_BE_SCRAPED.name());

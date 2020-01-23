@@ -15,8 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 public class DownloadController {
@@ -55,6 +58,16 @@ public class DownloadController {
     @PostMapping(path = "/download/series", consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity addFromSeries(@RequestBody SeriesRequestModel seriesRequestModel) {
         scraperService.addEpisodesToTable(seriesRequestModel.getUrl(), seriesRequestModel.getSortingFolder(), seriesRequestModel.getSeason());
+        return new ResponseEntity(HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping(path = "/reset", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity resetStatus(@RequestBody SeriesRequestModel seriesRequestModel) {
+        List<FileEntity> fileEntities = fileRepository.findBySortingFolderAndSeasonAndDownloadStatus(seriesRequestModel.getSortingFolder(), seriesRequestModel.getSeason(), FileDownloadStatus.CANNOT_BE_SCRAPED.name());
+        fileEntities.forEach(x -> {
+            x.setDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
+            fileRepository.save(x);
+        });
         return new ResponseEntity(HttpStatus.ACCEPTED);
     }
 }
