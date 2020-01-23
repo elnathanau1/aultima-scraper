@@ -38,14 +38,14 @@ public class PiTransferService {
     @Autowired
     private FileRepository fileRepository;
 
-//    @PostConstruct
-//    public void resetTransferringFiles() {
-//        List<FileEntity> fileEntities = fileRepository.findByDownloadStatus(FileDownloadStatus.TRANSFERRING.name());
-//        fileEntities.forEach(entity -> {
-//            entity.setDownloadStatus(FileDownloadStatus.DOWNLOADED.name());
-//            fileRepository.save(entity);
-//        });
-//    }
+    @PostConstruct
+    public void resetTransferringFiles() {
+        List<FileEntity> fileEntities = fileRepository.findByDownloadStatus(FileDownloadStatus.TRANSFERRING.name());
+        fileEntities.forEach(entity -> {
+            entity.setDownloadStatus(FileDownloadStatus.DOWNLOADED.name());
+            fileRepository.save(entity);
+        });
+    }
 
     private ChannelSftp setupJsch() throws JSchException {
         JSch jsch = new JSch();
