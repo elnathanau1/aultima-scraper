@@ -38,5 +38,6 @@ public class FileEntity {
 
     private Integer season;
     private Integer episode;
+    private Integer priority;
 
 }

@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -37,32 +39,30 @@ public class ScraperTask {
 
     @Autowired
     NameService nameService;
-//    @Value("${download.scan.task.max.files}")
-//    private int maxFiles;
 
     @Scheduled(cron = "0 */2 * * * *")
     public void downloadFiles() throws InterruptedException {
         logger.info("Scanning for new files");
-        List<FileEntity> fileEntities = fileRepository.findByDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
+        FileEntity fileEntityExample = FileEntity.builder().downloadStatus(FileDownloadStatus.NOT_STARTED.name()).build();
+        Example<FileEntity> example = Example.of(fileEntityExample);
+        List<FileEntity> fileEntities = fileRepository.findAll(example, orderBy());
 //        Thread.sleep(randomService.getWaitTime());
 
         if (fileEntities.size() > 0) {
             FileEntity fileEntity = fileEntities.get(0);
 
-            // fix name
-            // can be removed later, will add name in controller
-            String name = nameService.getName(fileEntity);
-            fileEntity.setName(name);
-            fileRepository.save(fileEntity);
-
             String downloadLink = scraperService.getDownloadLink(fileEntity.getUrl());
             if (downloadLink != null) {
-                logger.info("Could not find download link for {}", fileEntity.getName());
                 downloadService.downloadFromUrl(fileEntity, downloadLink);
             } else {
+                logger.info("Could not find download link for {}", fileEntity.getName());
                 fileEntity.setDownloadStatus(FileDownloadStatus.CANNOT_BE_SCRAPED.name());
                 fileRepository.save(fileEntity);
             }
         }
+    }
+
+    private Sort orderBy() {
+        return Sort.by(Sort.Order.desc("priority"), Sort.Order.asc("episode"));
     }
 }

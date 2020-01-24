@@ -21,4 +21,6 @@ public class SeriesRequestModel {
     private Integer season;
 
     private String url;
+
+    private Integer priority;
 }

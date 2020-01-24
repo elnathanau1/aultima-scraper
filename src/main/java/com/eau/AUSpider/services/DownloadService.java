@@ -2,6 +2,7 @@ package com.eau.AUSpider.services;
 
 import com.eau.AUSpider.entities.FileEntity;
 import com.eau.AUSpider.enums.FileDownloadStatus;
+import com.eau.AUSpider.enums.MediaType;
 import com.eau.AUSpider.repositories.FileRepository;
 import com.google.common.base.Stopwatch;
 import org.apache.commons.io.FileUtils;
@@ -41,10 +42,16 @@ public class DownloadService {
     public void downloadFromUrl(FileEntity fileEntity, String downloadUrl) {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        String relativePath = fileEntity.getMediaType() + "/"
-                + fileEntity.getSortingFolder() + "/"
-                + "Season " + fileEntity.getSeason() + "/"
-                + fileEntity.getName() + ".mp4";
+        String relativePath = "";
+        if (fileEntity.getMediaType().equals(MediaType.TV.name())) {
+            relativePath = fileEntity.getMediaType() + "/"
+                    + fileEntity.getSortingFolder() + "/"
+                    + "Season " + fileEntity.getSeason() + "/"
+                    + fileEntity.getName() + ".mp4";
+        }
+        else if (fileEntity.getMediaType().equals(MediaType.MOVIES.name())) {
+            relativePath = fileEntity.getMediaType() + "/" + fileEntity.getName() + "/" + fileEntity.getName() + ".mp4";
+        }
         String fileName = localDownloadPath + relativePath;
 
         fileEntity.setFileLocation(relativePath);

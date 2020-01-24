@@ -3,8 +3,12 @@ package com.eau.AUSpider.services;
 import com.eau.AUSpider.entities.FileEntity;
 import com.eau.AUSpider.enums.FileDownloadStatus;
 import com.eau.AUSpider.repositories.FileRepository;
-import com.jcraft.jsch.*;
-import org.apache.commons.lang3.time.StopWatch;
+import com.github.fracpete.processoutput4j.output.ConsoleOutputProcessOutput;
+import com.github.fracpete.rsync4j.RSync;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +22,6 @@ import java.util.List;
 @Service
 public class PiTransferService {
     private static Logger logger = LoggerFactory.getLogger(PiTransferService.class);
-
-    private static final int THREAD_POOL_SIZE = 10;
 
     @Value("${pi.landing.folder}")
     private String piLandingFolder;
@@ -48,7 +50,7 @@ public class PiTransferService {
         });
     }
 
-    private ChannelSftp setupJsch() throws JSchException {
+    private ChannelSftp setupJsch() throws Exception {
         JSch jsch = new JSch();
         // run 'ssh-keyscan -H -t rsa HOST_NAME >> known_hosts'
         jsch.setKnownHosts("/Users/eau/.ssh/known_hosts");

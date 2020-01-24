@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -115,7 +116,7 @@ public class ScraperService {
         return null;
     }
 
-    public void addEpisodesToTable(String url, String sortingFolder, int season) {
+    public void addEpisodesToTable(String url, String sortingFolder, int season, int priority) {
         String html = getHtmlFromSelenium(url, "Episode #");
         try {
             Document document = Jsoup.parse(html);
@@ -127,7 +128,14 @@ public class ScraperService {
                 int episode = Integer.parseInt(row.getElementsByAttributeValue("scope", "row").get(0).text());
                 String epUrl = row.getElementsByAttribute("href").get(0).attr("href");
 
-                if (fileRepository.findBySortingFolderAndSeasonAndEpisode(sortingFolder, season, episode) == null) {
+                FileEntity fileEntityExample = FileEntity.builder()
+                        .sortingFolder(sortingFolder)
+                        .season(season)
+                        .episode(episode)
+                        .build();
+                Example<FileEntity> example = Example.of(fileEntityExample);
+
+                if (fileRepository.findAll(example).size() == 0) {
 
                     FileEntity fileEntity = FileEntity.builder()
                             .mediaType("TV")
@@ -136,6 +144,7 @@ public class ScraperService {
                             .episode(episode)
                             .url(epUrl)
                             .downloadStatus(FileDownloadStatus.NOT_STARTED.name())
+                            .priority(priority)
                             .build();
 
                     fileEntity.setName(nameService.getName(fileEntity));
@@ -144,8 +153,7 @@ public class ScraperService {
                 }
             }
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Failed to scrape episodes from url={}", url, e);
         }
     }

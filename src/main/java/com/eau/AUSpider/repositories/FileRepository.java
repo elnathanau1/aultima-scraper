@@ -9,6 +9,4 @@ import java.util.List;
 @Repository
 public interface FileRepository extends JpaRepository<FileEntity, Long> {
     List<FileEntity> findByDownloadStatus(String downloadStatus);
-    FileEntity findBySortingFolderAndSeasonAndEpisode(String sortingFolder, int season, int episode);
-    List<FileEntity> findBySortingFolderAndSeasonAndDownloadStatus(String sortingFolder, int season, String downloadStatus);
 }

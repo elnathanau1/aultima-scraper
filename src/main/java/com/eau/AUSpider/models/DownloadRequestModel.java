@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class DownloadRequestModel {
-//    private String name;
     private Integer season;
 
     private Integer episode;
@@ -25,4 +24,6 @@ public class DownloadRequestModel {
     private String sortingFolder;
 
     private String url;
+
+    private Integer priority;
 }

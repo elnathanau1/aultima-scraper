@@ -11,11 +11,11 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,7 +41,14 @@ public class DownloadController {
     public ResponseEntity addDownloadRequest(@RequestBody DownloadRequestModel downloadRequestModel) {
         FileEntity fileEntity = modelMapper.map(downloadRequestModel, FileEntity.class);
 
-        if (fileRepository.findBySortingFolderAndSeasonAndEpisode(fileEntity.getSortingFolder(), fileEntity.getSeason(), fileEntity.getEpisode()) == null) {
+        FileEntity fileEntityExample = FileEntity.builder()
+                .sortingFolder(fileEntity.getSortingFolder())
+                .season(fileEntity.getSeason())
+                .episode(fileEntity.getEpisode())
+                .build();
+        Example<FileEntity> example = Example.of(fileEntityExample);
+
+        if (fileRepository.findAll(example).size() == 0) {
             fileEntity.setDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
 
             String name = nameService.getName(fileEntity);
@@ -57,13 +64,21 @@ public class DownloadController {
 
     @PostMapping(path = "/download/series", consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity addFromSeries(@RequestBody SeriesRequestModel seriesRequestModel) {
-        scraperService.addEpisodesToTable(seriesRequestModel.getUrl(), seriesRequestModel.getSortingFolder(), seriesRequestModel.getSeason());
+        scraperService.addEpisodesToTable(seriesRequestModel.getUrl(), seriesRequestModel.getSortingFolder(), seriesRequestModel.getSeason(), seriesRequestModel.getPriority());
         return new ResponseEntity(HttpStatus.ACCEPTED);
     }
 
     @PostMapping(path = "/reset", consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity resetStatus(@RequestBody SeriesRequestModel seriesRequestModel) {
-        List<FileEntity> fileEntities = fileRepository.findBySortingFolderAndSeasonAndDownloadStatus(seriesRequestModel.getSortingFolder(), seriesRequestModel.getSeason(), FileDownloadStatus.CANNOT_BE_SCRAPED.name());
+
+        FileEntity fileEntityExample = FileEntity.builder()
+                .sortingFolder(seriesRequestModel.getSortingFolder())
+                .season(seriesRequestModel.getSeason())
+                .downloadStatus(FileDownloadStatus.CANNOT_BE_SCRAPED.name())
+                .build();
+        Example<FileEntity> example = Example.of(fileEntityExample);
+
+        List<FileEntity> fileEntities = fileRepository.findAll(example);
         fileEntities.forEach(x -> {
             x.setDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
             fileRepository.save(x);

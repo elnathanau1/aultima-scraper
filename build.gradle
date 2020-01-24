@@ -47,6 +47,8 @@ dependencies {
 	// modelmapper to convert objects
 	compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.4'
 
+	// https://mvnrepository.com/artifact/com.github.fracpete/rsync4j
+	compile group: 'com.github.fracpete', name: 'rsync4j', version: '3.1.2-8'
 
 
 
