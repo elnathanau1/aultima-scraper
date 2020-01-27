@@ -4,7 +4,6 @@ import com.eau.AUSpider.entities.FileEntity;
 import com.eau.AUSpider.enums.FileDownloadStatus;
 import com.eau.AUSpider.enums.MediaType;
 import com.eau.AUSpider.repositories.FileRepository;
-import com.google.common.base.Stopwatch;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.asynchttpclient.*;
@@ -14,10 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -43,20 +40,36 @@ public class DownloadService {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         String relativePath = "";
+        String fileName = "";
         if (fileEntity.getMediaType().equals(MediaType.TV.name())) {
             relativePath = fileEntity.getMediaType() + "/"
                     + fileEntity.getSortingFolder() + "/"
                     + "Season " + fileEntity.getSeason() + "/"
                     + fileEntity.getName() + ".mp4";
-        }
-        else if (fileEntity.getMediaType().equals(MediaType.MOVIES.name())) {
-            relativePath = fileEntity.getMediaType() + "/" + fileEntity.getName() + "/" + fileEntity.getName() + ".mp4";
-        }
-        String fileName = localDownloadPath + relativePath;
 
-        fileEntity.setFileLocation(relativePath);
-        fileEntity.setDownloadStatus(FileDownloadStatus.DOWNLOADING.name());
-        fileRepository.save(fileEntity);
+            fileName = localDownloadPath + relativePath;
+
+            fileEntity.setFileLocation(relativePath);
+//            fileEntity.setDownloadStatus(FileDownloadStatus.DOWNLOADING.name());
+
+            fileEntity.setDownloadStatus(FileDownloadStatus.SEND_TO_PI.name());
+            fileEntity.setDownloadUrl(downloadUrl);
+            fileRepository.save(fileEntity);
+            logger.info("Sent {} to pi", fileEntity.getName());
+
+            fileRepository.save(fileEntity);
+
+            return;
+        } else if (fileEntity.getMediaType().equals(MediaType.MOVIES.name())) {
+            relativePath = fileEntity.getMediaType() + "/" + fileEntity.getName() + "/" + fileEntity.getName() + ".mp4";
+
+            fileEntity.setFileLocation(relativePath);
+            fileEntity.setDownloadStatus(FileDownloadStatus.SEND_TO_PI.name());
+            fileEntity.setDownloadUrl(downloadUrl);
+            fileRepository.save(fileEntity);
+            logger.info("Sent {} to pi", fileEntity.getName());
+            return;
+        }
 
         try {
             File newFile = new File(fileName);

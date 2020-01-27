@@ -2,10 +2,11 @@ package com.eau.AUSpider.services;
 
 import com.eau.AUSpider.entities.FileEntity;
 import com.eau.AUSpider.enums.MediaType;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NameService {
+public class UtilService {
 
     public String getName(FileEntity fileEntity) {
         if (fileEntity.getMediaType().equals(MediaType.TV.name())) {
@@ -15,5 +16,9 @@ public class NameService {
             return fileEntity.getSortingFolder();
         }
         return null;
+    }
+
+    public Sort orderBy() {
+        return Sort.by(Sort.Order.desc("priority"), Sort.Order.asc("season"), Sort.Order.asc("episode"));
     }
 }

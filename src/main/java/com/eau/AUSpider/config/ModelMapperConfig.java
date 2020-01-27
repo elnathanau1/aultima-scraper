@@ -24,6 +24,7 @@ public class ModelMapperConfig {
             mapping.skip(FileEntity::setDownloadStatus);
             mapping.skip(FileEntity::setFileLocation);
             mapping.skip(FileEntity::setFileSize);
+            mapping.skip(FileEntity::setDownloadUrl);
         });
 
         return modelMapper;

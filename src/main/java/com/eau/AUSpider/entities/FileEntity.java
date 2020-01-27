@@ -40,4 +40,6 @@ public class FileEntity {
     private Integer episode;
     private Integer priority;
 
+    private String downloadUrl;
+
 }

@@ -6,6 +6,7 @@ import com.eau.AUSpider.enums.FileDownloadStatus;
 import com.eau.AUSpider.enums.MediaType;
 import com.eau.AUSpider.repositories.FileRepository;
 import com.eau.AUSpider.services.PiTransferService;
+import com.eau.AUSpider.services.UtilService;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,9 @@ public class PiTransferTask {
     private FileRepository fileRepository;
 
     @Autowired
+    private UtilService utilService;
+
+    @Autowired
     PiTransferService piTransferService;
 
     @Scheduled(cron = "0 5-50/1 * * * *")
@@ -41,7 +45,7 @@ public class PiTransferTask {
                 .build();
         Example<FileEntity> example = Example.of(fileEntityExample);
 
-        List<FileEntity> fileEntities = fileRepository.findAll(example, orderBy());
+        List<FileEntity> fileEntities = fileRepository.findAll(example, utilService.orderBy());
         if (fileEntities.size() > 0){
             FileEntity fileEntity = fileEntities.get(0);
             StopWatch stopWatch = new StopWatch();
@@ -61,7 +65,7 @@ public class PiTransferTask {
                 .build();
         Example<FileEntity> example = Example.of(fileEntityExample);
 
-        List<FileEntity> fileEntities = fileRepository.findAll(example, orderBy());
+        List<FileEntity> fileEntities = fileRepository.findAll(example, utilService.orderBy());
         if (fileEntities.size() > 0){
             FileEntity fileEntity = fileEntities.get(0);
             StopWatch stopWatch = new StopWatch();
@@ -73,7 +77,4 @@ public class PiTransferTask {
         }
     }
 
-    private Sort orderBy() {
-        return Sort.by(Sort.Order.desc("priority"), Sort.Order.asc("episode"));
-    }
 }

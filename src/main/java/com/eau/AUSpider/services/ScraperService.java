@@ -32,7 +32,7 @@ public class ScraperService {
     FileRepository fileRepository;
 
     @Autowired
-    NameService nameService;
+    UtilService utilService;
 
     @PostConstruct
     private void setup() {
@@ -79,6 +79,15 @@ public class ScraperService {
                 return element.attr("value");
             }
         }
+
+        elements = document.select("iframe");
+        for (Element element : elements) {
+            String tempSrc = element.attr("src");
+            if(tempSrc != null) {
+                return tempSrc.substring(tempSrc.lastIndexOf("/") + 1);
+            }
+        }
+
         return null;
     }
 
@@ -147,7 +156,7 @@ public class ScraperService {
                             .priority(priority)
                             .build();
 
-                    fileEntity.setName(nameService.getName(fileEntity));
+                    fileEntity.setName(utilService.getName(fileEntity));
                     fileRepository.save(fileEntity);
                     logger.info("Saved to db: {}", fileEntity);
                 }

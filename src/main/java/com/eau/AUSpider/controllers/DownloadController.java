@@ -5,7 +5,7 @@ import com.eau.AUSpider.enums.FileDownloadStatus;
 import com.eau.AUSpider.models.DownloadRequestModel;
 import com.eau.AUSpider.models.SeriesRequestModel;
 import com.eau.AUSpider.repositories.FileRepository;
-import com.eau.AUSpider.services.NameService;
+import com.eau.AUSpider.services.UtilService;
 import com.eau.AUSpider.services.ScraperService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class DownloadController {
     FileRepository fileRepository;
 
     @Autowired
-    NameService nameService;
+    UtilService utilService;
 
     @Autowired
     ModelMapper modelMapper;
@@ -51,7 +51,7 @@ public class DownloadController {
         if (fileRepository.findAll(example).size() == 0) {
             fileEntity.setDownloadStatus(FileDownloadStatus.NOT_STARTED.name());
 
-            String name = nameService.getName(fileEntity);
+            String name = utilService.getName(fileEntity);
             fileEntity.setName(name);
             fileRepository.save(fileEntity);
 
